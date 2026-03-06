@@ -2,34 +2,26 @@ version: '3.8'
 
 services:
   comfyui:
-    image: yanwk/comfyui-boot:cu124-slim
+    image: yanwk/comfyui-boot:latest
     container_name: comfyui
-    stdin_open: true
-    tty: true
-    
-    # Port mapping - ComfyUI runs on 8188
-    ports:
-      - "8188:8188"
-    
-    # Persistent volumes for models, outputs, and settings
-    volumes:
-      - ./comfyui-data:/root
-    
-    # GPU support - adjust if you have multiple GPUs
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    
-    # Environment variables for ComfyUI
-    environment:
-      # Listen on all interfaces so Coolify can route to it
-      - COMFYUI_ARGS=--listen 0.0.0.0 --preview-method auto
-      # Memory optimization - adjust based on your VRAM
-      # Uncomment if you want to test with different settings:
-      # - COMFYUI_ARGS=--listen 0.0.0.0 --normalvram
-    
+    expose:
+      - "8188"
     restart: unless-stopped
+    environment:
+      - CLI_ARGS=--listen 0.0.0.0 --port 8188 --cpu
+      - LOW_VRAM=true
+    volumes:
+      - comfyui-models:/app/models
+      - comfyui-output:/app/output
+      - comfyui-user:/app/user
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  comfyui-models:
+  comfyui-output:
+  comfyui-user:
