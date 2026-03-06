@@ -1,26 +1,21 @@
-version: '3.8'
-
 services:
   comfyui:
-    image: ghcr.io/ai-dock/comfyui:latest-cpu
+    image: joepitt91/comfyui:cpu
+    # O para ARM64 CPU: ardenius/comfyui-cpu:latest
     container_name: comfyui
-    expose:
-      - "8188"
     restart: unless-stopped
-    environment:
-      - CLI_ARGS=--listen 0.0.0.0 --port 8188
+    ports:
+      - "8188:8188"
     volumes:
-      - comfyui-models:/workspace/ComfyUI/models
-      - comfyui-output:/workspace/ComfyUI/output
-      - comfyui-user:/workspace/ComfyUI/user
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8188/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      - comfyui-models:/opt/ComfyUI/models
+      - comfyui-output:/opt/ComfyUI/output
+      - comfyui-input:/opt/ComfyUI/input
+      - comfyui-custom-nodes:/opt/ComfyUI/custom_nodes
+    environment:
+      - CLI_ARGS=--cpu --listen 0.0.0.0 --port 8188
 
 volumes:
   comfyui-models:
   comfyui-output:
-  comfyui-user:
+  comfyui-input:
+  comfyui-custom-nodes:
